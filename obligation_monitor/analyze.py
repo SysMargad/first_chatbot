@@ -37,6 +37,8 @@ class Summary:
     closed: int = 0
     in_progress: int = 0
     not_started: int = 0
+    # 30 хоногт дуусах боловч ажил хараахан эхлээгүй — "ACTION RISK" хайрцаг
+    not_started_soon: int = 0
 
     @property
     def evidence_rate(self) -> int:
@@ -104,6 +106,13 @@ def summarize(data: RegisterData, settings: Settings, *, today: dt.date | None =
                 summary.critical += 1
             elif item.days_left <= settings.due_soon_days:
                 summary.due_soon += 1
+
+        if (
+            item.days_left is not None
+            and 0 <= item.days_left <= settings.due_soon_days
+            and "not started" in status
+        ):
+            summary.not_started_soon += 1
 
         if item.evidence.strip().lower() in EVIDENCE_GAP:
             summary.evidence_gap += 1

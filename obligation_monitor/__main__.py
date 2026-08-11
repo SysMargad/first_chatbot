@@ -36,7 +36,8 @@ def _now(settings: Settings) -> dt.datetime:
 
 
 def cmd_daily(settings: Settings, args: argparse.Namespace) -> int:
-    today = _now(settings).date()
+    now = _now(settings)
+    today = now.date()
     data = sheets.collect_obligations(settings, today=today)
     summary = analyze.summarize(data, settings, today=today)
 
@@ -46,6 +47,7 @@ def cmd_daily(settings: Settings, args: argparse.Namespace) -> int:
         settings,
         source=", ".join(data.sheets_used),
         warning=data.warning,
+        now=now,
     )
     chat.send(settings.webhook_url, payload, dry_run=args.dry_run)
 

@@ -1,0 +1,13 @@
+chatbot@superb-joy-504809-s2.iam.gserviceaccount.com
+
+# Одоо шууд илгээх (хуваарь хүлээхгүй)
+python -m obligation_monitor daily
+
+# Илгээхгүйгээр харах
+python -m obligation_monitor daily --dry-run
+
+# Exception мэдэгдлийг эргүүлж асаах
+Enable-ScheduledTask -TaskName "Obligation exceptions"
+
+# Хуваарийг бүрмөсөн устгах
+schtasks /delete /f /tn "Obligation daily"

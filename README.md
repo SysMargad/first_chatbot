@@ -3,7 +3,7 @@
 Obligation Register spreadsheet-ээс өдөр бүр автоматаар Google Chat space руу
 удирдлагад ойлгомжтой товч мэдээ болон exception анхааруулга илгээнэ.
 
-Эх дата: `1cP-i5klZviD4PCRPSN-mwil-P1fmv_07ey10IKZArRk` — өөр эх сурвалж ашиглахгүй.
+Эх дата: `1fS3eBYObw8l9zKv-Gz02xTWVoUZwixgk62uRDMxqI_0` — өөр эх сурвалж ашиглахгүй.
 
 **Хуудас оноор автоматаар сонгогдоно.** 2026 онд `OB 2026`, 2027 он гармагц
 `OB 2027`, 2028 онд `OB 2028` … гэх мэт. Код өөрчлөх шаардлагагүй.
@@ -121,7 +121,7 @@ pip install -r requirements.txt
 
 ```
 CHAT_WEBHOOK_URL=https://chat.googleapis.com/v1/spaces/.../messages?key=...&token=...
-SPREADSHEET_ID=1cP-i5klZviD4PCRPSN-mwil-P1fmv_07ey10IKZArRk
+SPREADSHEET_ID=1fS3eBYObw8l9zKv-Gz02xTWVoUZwixgk62uRDMxqI_0
 GOOGLE_APPLICATION_CREDENTIALS=service-account.json
 ```
 

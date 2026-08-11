@@ -84,7 +84,7 @@ def load_settings(env_path: Path | None = None) -> Settings:
         )
 
     spreadsheet_id = value(
-        "SPREADSHEET_ID", "1cP-i5klZviD4PCRPSN-mwil-P1fmv_07ey10IKZArRk"
+        "SPREADSHEET_ID", "1fS3eBYObw8l9zKv-Gz02xTWVoUZwixgk62uRDMxqI_0"
     )
 
     credentials = Path(

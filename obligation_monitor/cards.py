@@ -289,7 +289,7 @@ def build_daily_card(
                 "cardId": f"daily-{summary.stamp}",
                 "card": {
                     "header": {
-                        "title": f"{mood} ЛИЦЕНЗИЙН ҮҮРГИЙН ӨДӨР ТУТМЫН ХЯНАЛТ",
+                        "title": f"{mood} ЛИЦЕНЗИЙН ҮҮРГИЙН ХЯНАЛТ",
                         "subtitle": subtitle,
                         "imageType": "CIRCLE",
                     },

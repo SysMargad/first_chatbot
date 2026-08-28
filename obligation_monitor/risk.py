@@ -79,6 +79,6 @@ def note(item: Obligation, situation: str) -> str:
 
 
 def situation(item: Obligation, *, bad_status: bool) -> str:
-    if item.days_left is not None and item.days_left < 0:
+    if item.is_late:
         return OVERDUE
     return FLAGGED if bad_status else DUE

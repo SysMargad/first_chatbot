@@ -140,11 +140,10 @@ def cmd_sheets(settings: Settings, args: argparse.Namespace) -> int:
         chosen = [sheets.match_title(titles, w) for w in settings.register_sheets]
         note = "гараар тогтоосон (REGISTER_SHEETS)"
     else:
-        resolved, warning = sheets.resolve_year_sheet(
+        chosen, warning = sheets.resolve_year_sheets(
             titles, year, settings.register_sheet_pattern
         )
-        chosen = [resolved]
-        note = warning or f"{year} оны хуудас"
+        note = warning or f"{year} он ба түүнээс хойшхи хуудсууд"
 
     print(f"Spreadsheet: {settings.spreadsheet_url}")
     print(f"Одоогийн он : {year}  →  {note}\n")

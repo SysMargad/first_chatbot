@@ -57,6 +57,25 @@ class Obligation:
     def is_tier1(self) -> bool:
         return "tier 1" in self.tier.lower()
 
+    @property
+    def is_done(self) -> bool:
+        """Биелсэн/хаагдсан үүрэг."""
+        status = self.status.strip().lower()
+        return "completed" in status or "closed" in status
+
+    @property
+    def is_late(self) -> bool:
+        """Хугацаа хэтэрсэн — БИЕЛЭЭГҮЙ хэвээр байгаа.
+
+        Биелсэн үүргийн due date өнгөрсөн байх нь хэвийн (жишээ нь 02/15-нд
+        тайлан хүргүүлээд дуусгасан) тул зөрчил гэж тоолохгүй.
+        """
+        return (
+            not self.is_done
+            and self.days_left is not None
+            and self.days_left < 0
+        )
+
 
 @dataclass
 class RegisterData:
@@ -216,6 +235,48 @@ def resolve_year_sheet(
     )
 
 
+def sheet_year(title: str) -> int | None:
+    """`OB 2027` → 2027. Оны хуудас биш бол None."""
+    found = _YEAR_SHEET_RE.match(normalize(title))
+    return int(found.group(1)) if found else None
+
+
+def resolve_year_sheets(
+    titles: Sequence[str], year: int, pattern: str = "OB {year}"
+) -> tuple[list[str], str | None]:
+    """Тухайн он БОЛОН түүнээс хойшхи бүх оны хуудсыг олно.
+
+    2026 онд `OB 2026` + `OB 2027` хоёуланг уншина — нэг үүрэг хоёр хуудсанд
+    байвал `deduplicate` идэвхтэй мөчлөгтэйг нь сонгоно. `OB Master (backup)`
+    зэрэг оны бус хуудсыг хэзээ ч оруулахгүй.
+    """
+    candidates: dict[int, str] = {}
+    for title in titles:
+        found = sheet_year(title)
+        if found is not None:
+            candidates[found] = title
+
+    wanted = pattern.format(year=year)
+    exact = match_title(titles, wanted)
+    if exact and year not in candidates:
+        candidates[year] = exact
+
+    if not candidates:
+        return [], f"'{wanted}' хуудас олдсонгүй, оны хуудас огт байхгүй байна."
+
+    current = sorted(y for y in candidates if y >= year)
+    if current:
+        return [candidates[y] for y in current], None
+
+    # Одоогийн болон ирээдүйн оных алга — хамгийн сүүлийнхийг түр ашиглана
+    fallback = max(candidates)
+    return (
+        [candidates[fallback]],
+        f"'{wanted}' хуудас хараахан үүсээгүй тул '{candidates[fallback]}'-г "
+        "түр ашиглаж байна. Шинэ оны бүртгэлийг үүсгэнэ үү.",
+    )
+
+
 def fetch_values(service, spreadsheet_id: str, title: str) -> list[Row]:
     """Хуудсыг бүтнээр нь уншина (харагдаж буй утгаар)."""
     result = (
@@ -341,12 +402,11 @@ def collect_obligations(
     if settings.register_sheets:
         wanted_titles = list(settings.register_sheets)
     else:
-        resolved, warning = resolve_year_sheet(
+        wanted_titles, warning = resolve_year_sheets(
             titles, today.year, settings.register_sheet_pattern
         )
         if warning:
             print(f"[анхаар] {warning}")
-        wanted_titles = [resolved] if resolved else []
 
     for wanted in wanted_titles:
         title = match_title(titles, wanted)
@@ -362,9 +422,13 @@ def collect_obligations(
 
         used.append(title)
         headers = index_headers(values[header_index])
+        # Багануудыг тухайн ХУУДСЫН оноор хайна — `OB 2027` дээр
+        # `2027 Одоогийн статус` багана байна.
         columns = {
             name: pick(headers, aliases)
-            for name, aliases in _column_aliases(today.year).items()
+            for name, aliases in _column_aliases(
+                sheet_year(title) or today.year
+            ).items()
         }
 
         for row in values[header_index + 1 :]:
@@ -406,10 +470,26 @@ def collect_obligations(
 
 
 def deduplicate(rows: Sequence[Obligation]) -> list[Obligation]:
-    """Нэг ID 2026/2027 хоёуланд байвал идэвхтэй мөчлөгтэйг нь үлдээнэ."""
+    """Нэг ID 2026/2027 хоёуланд байвал идэвхтэй мөчлөгтэйг нь үлдээнэ.
 
-    def score(item: Obligation) -> int:
-        return (2 if item.due else 0) + (1 if item.is_active else 0)
+    Дараалал: идэвхтэй → due date-тай → шийдэгдээгүй зөрчил → дуусаагүй.
+    Тэнцвэл due date нь ойр байгааг нь сонгоно. Ингэснээр биелчихсэн 2026
+    оны мөчлөгийн оронд хүлээгдэж буй 2027 оных харагдана, харин
+    биелээгүй хэвээр хэтэрсэн зөрчил нуугдахгүй.
+    """
+
+    def score(item: Obligation) -> tuple[int, int]:
+        rank = 0
+        if item.is_active:
+            rank += 8
+        if item.due:
+            rank += 4
+        if item.is_late:
+            rank += 2
+        if not item.is_done:
+            rank += 1
+        nearest = -item.due.toordinal() if item.due else -10**7
+        return (rank, nearest)
 
     best: dict[str, Obligation] = {}
     for item in rows:

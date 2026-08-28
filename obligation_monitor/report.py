@@ -99,11 +99,7 @@ class LicenseGroup:
 
     @property
     def overdue(self) -> int:
-        return sum(
-            1
-            for item in self.active_rows
-            if item.days_left is not None and item.days_left < 0
-        )
+        return sum(1 for item in self.active_rows if item.is_late)
 
     @property
     def red(self) -> int:
@@ -111,8 +107,7 @@ class LicenseGroup:
         return sum(
             1
             for item in self.active_rows
-            if not (item.days_left is not None and item.days_left < 0)
-            and item.status.strip().lower() in BAD_STATUSES
+            if not item.is_late and item.status.strip().lower() in BAD_STATUSES
         )
 
     def due_within(self, days: int) -> int:
@@ -292,7 +287,7 @@ def build_portfolio(
             continue
         stat.active += 1
 
-        overdue = item.days_left is not None and item.days_left < 0
+        overdue = item.is_late
         red = not overdue and item.status.strip().lower() in BAD_STATUSES
         gap = item.evidence.strip().lower() in EVIDENCE_GAP
 
@@ -313,7 +308,7 @@ def build_portfolio(
             types[code] = stat
 
         stat.total += 1
-        overdue = item.days_left is not None and item.days_left < 0
+        overdue = item.is_late
         stat.overdue += overdue
         stat.red += not overdue and item.status.strip().lower() in BAD_STATUSES
         stat.evidence_gap += item.evidence.strip().lower() in EVIDENCE_GAP

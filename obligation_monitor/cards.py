@@ -48,13 +48,13 @@ def problem_rows(rows: Sequence[Obligation]) -> list[Obligation]:
     overdue = [
         item
         for item in rows
-        if item.is_active and item.days_left is not None and item.days_left < 0
+        if item.is_active and item.is_late
     ]
     flagged = [
         item
         for item in rows
         if item.is_active
-        and not (item.days_left is not None and item.days_left < 0)
+        and not item.is_late
         and item.status.strip().lower() in BAD_STATUSES
     ]
     overdue.sort(key=lambda item: item.days_left)
@@ -64,7 +64,7 @@ def problem_rows(rows: Sequence[Obligation]) -> list[Obligation]:
 
 def _problem_headline(item: Obligation) -> str:
     """Яагаад асуудалтай болохыг богино гарчиг болгоно."""
-    if item.days_left is not None and item.days_left < 0:
+    if item.is_late:
         return f"{abs(item.days_left)} хоног хэтэрсэн"
     return item.status or "төлөв тодорхойгүй"
 

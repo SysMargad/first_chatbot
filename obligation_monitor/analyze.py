@@ -67,9 +67,7 @@ class Exception_:
 
 
 def is_overdue(item: Obligation) -> bool:
-    if item.days_left is not None and item.days_left < 0:
-        return True
-    return item.status.strip().lower() in BAD_STATUSES
+    return item.is_late or item.status.strip().lower() in BAD_STATUSES
 
 
 def needs_link(item: Obligation) -> bool:
@@ -97,7 +95,7 @@ def summarize(data: RegisterData, settings: Settings, *, today: dt.date | None =
             summary.not_started += 1
 
         # Хугацааны ангилал — харилцан давхцахгүй
-        if item.days_left is not None and item.days_left < 0:
+        if item.is_late:
             summary.overdue += 1
         elif item.status.strip().lower() in BAD_STATUSES:
             summary.flagged += 1
@@ -133,7 +131,7 @@ def detect_exceptions(data: RegisterData, settings: Settings) -> list[Exception_
         days = item.days_left
         status = item.status.strip().lower()
 
-        if days is not None and days < 0:
+        if item.is_late:
             found.append(
                 _make(item, "OVERDUE", SEVERITY_CRITICAL, f"Хугацаа {abs(days)} хоногоор хэтэрсэн")
             )

@@ -166,8 +166,8 @@ def _license_line(group: LicenseGroup, settings: Settings) -> str:
         facts.append(f"{group.next_due.isoformat()} ({day_label(group.days_left)})")
 
     return (
-        f"{_license_flag(group, settings)} <b>{title}</b> · "
-        f"{trim(group.project, 28)} — {' · '.join(facts)}"
+        f"{_license_flag(group, settings)} {title} · "
+        f"<b>{trim(group.project, 28)}</b> — {' · '.join(facts)}"
     )
 
 

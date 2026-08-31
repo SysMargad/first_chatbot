@@ -193,8 +193,10 @@ def match_title(titles: Iterable[str], wanted: str) -> str | None:
     return None
 
 
-# `OB 2027`, `OB2027`, `OB-2027`, `OB_2027` бүгдийг таана
-_YEAR_SHEET_RE = re.compile(r"^ob[\s._-]*(\d{4})\b")
+# Оны register хуудсыг таних: `OB 2027`, `OB2027`, `OB-2027` болон
+# `Obligations 2027`, `Obligation 2027` бүгд тохирно.
+# `Archive - OB Master`, `Calendar 2027` зэрэг нь ТОХИРОХГҮЙ.
+_YEAR_SHEET_RE = re.compile(r"^ob(?:ligations?)?[\s._-]*(\d{4})\b")
 
 
 def resolve_year_sheet(

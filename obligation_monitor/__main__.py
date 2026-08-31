@@ -39,6 +39,19 @@ def cmd_daily(settings: Settings, args: argparse.Namespace) -> int:
     now = _now(settings)
     today = now.date()
     data = sheets.collect_obligations(settings, today=today)
+
+    # Хоосон тайлан илгээх нь "бүх зүйл хэвийн" гэсэн ХУДАЛ мессеж өгнө.
+    # Хуудасны нэр өөрчлөгдсөн, эрх хасагдсан зэрэг тохиолдолд чимээгүй
+    # өнгөрөхийн оронд алдаа мэдээлж зогсоно.
+    if not data.rows:
+        raise RuntimeError(
+            "Бүртгэлээс нэг ч үүрэг уншигдсангүй — Chat руу ИЛГЭЭГЭЭГҮЙ.\n"
+            f"Уншихыг оролдсон хуудас: {', '.join(data.sheets_used) or '— олдсонгүй —'}\n"
+            + (f"{data.warning}\n" if data.warning else "")
+            + "'python -m obligation_monitor sheets' командаар хуудсуудын "
+            "жинхэнэ нэрийг шалгана уу."
+        )
+
     summary = analyze.summarize(data, settings, today=today)
 
     payload = cards.build_daily_card(

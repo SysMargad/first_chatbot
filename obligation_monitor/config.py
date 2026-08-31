@@ -59,7 +59,7 @@ class Settings:
     stale_report_days: int = 8  # 7 хоногийн тайлан хэдэн хоног гарахгүй бол анхааруулах
 
     # Хуудсыг оноор нь автоматаар сонгоно: 2026 онд "OB 2026", 2027 онд "OB 2027".
-    register_sheet_pattern: str = "OB {year}"
+    register_sheet_pattern: str = "Obligations {year}"
     # Гараар тогтоох бол (жишээ нь хоёр оныг зэрэг унших) — энэ давамгайлна.
     register_sheets: tuple[str, ...] | None = None
     runlog_sheet_hint: str = "weekly"
@@ -111,7 +111,9 @@ def load_settings(env_path: Path | None = None) -> Settings:
         critical_days=as_int("CRITICAL_DAYS", 7),
         due_soon_days=as_int("DUE_SOON_DAYS", 30),
         max_list_items=as_int("MAX_LIST_ITEMS", 5),
-        register_sheet_pattern=value("REGISTER_SHEET_PATTERN", "OB {year}"),
+        register_sheet_pattern=value(
+            "REGISTER_SHEET_PATTERN", "Obligations {year}"
+        ),
         register_sheets=register,
         runlog_sheet_hint=value("RUNLOG_SHEET_HINT", "weekly"),
     )
